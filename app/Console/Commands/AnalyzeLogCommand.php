@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\LogAnalyzers\Interfaces\LogAnalyzerInterface;
+use App\Services\LogAnalyzers\NginxLog;
 use App\Services\LogAnalyzers\TextLog;
 use Illuminate\Console\Command;
 
@@ -11,6 +12,7 @@ class AnalyzeLogCommand extends Command
 {
     protected static $types =[
         'text'=> TextLog::class,
+        'nginx'=> NginxLog::class
     ];
 
     /**
