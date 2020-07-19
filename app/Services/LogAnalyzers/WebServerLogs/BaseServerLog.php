@@ -29,10 +29,14 @@ abstract class BaseServerLog
 
     public function __construct()
     {
-        $this->data = $this->parsedData =  collect([]);
+        $this->data = $this->parsedData = collect([]);
         $this->parser = new LogParser();
     }
 
+    public function setFile($filename)
+    {
+        $this->filename = $filename;
+    }
 
     public function readData($linesCount = 50)
     {
