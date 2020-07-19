@@ -33,7 +33,7 @@ class TextLog implements LogAnalyzerInterface
     public function readData()
     {
         if (!Storage::exists($this->filename)) {
-            throw new \Exception('file nor found');
+            throw new \Exception('file not found');
         }
         $filePath = Storage::path($this->filename);
         $file = new \SplFileObject($filePath, 'r');

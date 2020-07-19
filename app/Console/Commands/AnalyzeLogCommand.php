@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\LogAnalyzers\ApacheLog;
 use App\Services\LogAnalyzers\Interfaces\LogAnalyzerInterface;
 use App\Services\LogAnalyzers\NginxLog;
 use App\Services\LogAnalyzers\TextLog;
@@ -12,7 +13,8 @@ class AnalyzeLogCommand extends Command
 {
     protected static $types =[
         'text'=> TextLog::class,
-        'nginx'=> NginxLog::class
+        'nginx'=> NginxLog::class,
+        'apache'=> ApacheLog::class
     ];
 
     /**
@@ -46,20 +48,25 @@ class AnalyzeLogCommand extends Command
      */
     public function handle()
     {
-        $logType = $this->option('type');
-        $analyzer = $this->getLogAnalyzer($logType);
-        $analyzer->setFile($this->argument('file'));
-        $analyzer->readData();
-        $analyzer->parseData();
-        $res = $analyzer->getAnalytics(true);
-        $keys = array_keys($res);
-        foreach ($keys as $key)
-        {
-            $this->info($key);
-            $data = $res[$key];
-            $headers = array_keys($data->first());
-            $this->table($headers, $data);
+        try {
+            $logType = $this->option('type');
+            $analyzer = $this->getLogAnalyzer($logType);
+            $analyzer->setFile($this->argument('file'));
+            $analyzer->readData();
+            $analyzer->parseData();
+            $res = $analyzer->getAnalytics(true);
+            $keys = array_keys($res);
+            foreach ($keys as $key)
+            {
+                $this->info($key);
+                $data = $res[$key];
+                $headers = array_keys($data->first());
+                $this->table($headers, $data);
+            }
+        }catch (\Exception $exception){
+            $this->error($exception->getMessage());
         }
+
         return 0;
     }
 
