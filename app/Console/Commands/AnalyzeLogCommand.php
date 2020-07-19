@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Services\LogAnalyzers\Interfaces\LogAnalyzerInterface;
 use App\Services\LogAnalyzers\TextLog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+
 
 class AnalyzeLogCommand extends Command
 {
@@ -49,8 +49,15 @@ class AnalyzeLogCommand extends Command
         $analyzer->setFile($this->argument('file'));
         $analyzer->readData();
         $analyzer->parseData();
-        $res = $analyzer->getAnalytics();
-        dump($res);
+        $res = $analyzer->getAnalytics(true);
+        $keys = array_keys($res);
+        foreach ($keys as $key)
+        {
+            $this->info($key);
+            $data = $res[$key];
+            $headers = array_keys($data->first());
+            $this->table($headers, $data);
+        }
         return 0;
     }
 
