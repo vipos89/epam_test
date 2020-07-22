@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+/**only for mass generation of pages it's not for prod* */
+Route::any('/{path?}/{sub_path?}', 'HomeController@index');
+

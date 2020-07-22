@@ -46,6 +46,12 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => 'debug',
         ],
+        'custom' => [
+            'driver' => 'single',
+            // must be the same as statistic.log_path
+            'path' => storage_path('custom_logs/web.log'),
+            'tap' => [App\Logging\CustomizeFormatter::class],
+        ],
 
         'daily' => [
             'driver' => 'daily',

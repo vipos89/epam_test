@@ -6,18 +6,18 @@ namespace App\Services\LogAnalyzers;
 
 use App\Services\FileReader;
 use App\Services\LogAnalyzers\Interfaces\LogAnalyzerInterface;
-use Illuminate\Support\Facades\Storage;
-use phpDocumentor\Reflection\Types\Self_;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 
 class TextLog implements LogAnalyzerInterface
 {
     public const LINES_COUNT = 50;
     /**
-     * @var \Illuminate\Support\Collection
+     * @var Collection
      */
     private $data;
     /**
-     * @var \Illuminate\Support\Collection
+     * @var Collection
      */
     private $parsedData;
     private $filename;
@@ -32,31 +32,35 @@ class TextLog implements LogAnalyzerInterface
 
     public function readData()
     {
-        if (!Storage::exists($this->filename)) {
+        if (!File::exists($this->filename)) {
             throw new \Exception('file not found');
         }
-        $filePath = Storage::path($this->filename);
-        $file = new \SplFileObject($filePath, 'r');
-        $file->seek(PHP_INT_MAX);
-        $totalLines = $file->key() + 1;
+
+        $totalLines = $this->getFileLinesCount();
         if ($totalLines) {
             $iterationCounts = ceil($totalLines / (self::LINES_COUNT));
-            $reader = new FileReader($filePath);
-            $reader->setOffset(0);
-            for ($i = 0; $i < $iterationCounts; $i++) {
-                $this->data = $this->data->merge(collect($reader->read(self::LINES_COUNT)));
+            try {
+                $reader = new FileReader($this->filename);
+                $reader->setOffset(0);
+                for ($i = 0; $i < $iterationCounts; $i++) {
+                    $this->data = $this->data->merge(collect($reader->read(self::LINES_COUNT)));
+                }
+            } catch (\Exception $exception) {
+                throw new \Exception('Can\'t read file');
             }
+
         }
     }
 
     public function parseData()
     {
         foreach ($this->data as $line) {
-            [$page, $userIp] = explode(' ', $line);
-            $this->parsedData->add(compact('page', 'userIp'));
+            // skip empty lines
+            if ($line) {
+                [$page, $userIp] = explode(' ', $line);
+                $this->parsedData->add(compact('page', 'userIp'));
+            }
         }
-
-
     }
 
     public function setFile($filename)
@@ -80,6 +84,19 @@ class TextLog implements LogAnalyzerInterface
             $statistic->add(['key' => $key, 'value' => $groupedData->get($key)->count()]);
         }
         $statistic = $statistic->sortByDesc('value');
-        return $fullMode? $statistic:$statistic->slice(0, self::SLICE_SIZE_FOR_SHOT_REPO);
+        return $fullMode ? $statistic : $statistic->slice(0, self::SLICE_SIZE_FOR_SHOT_REPO);
+    }
+
+    private function getFileLinesCount()
+    {
+        $file = new \SplFileObject($this->filename, 'r');
+        $file->seek(PHP_INT_MAX);
+        return $file->key() ? +1 : 0;
+    }
+
+
+    public function getParsedData()
+    {
+        return $this->parsedData;
     }
 }

@@ -2,20 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Services\LogAnalyzers\ApacheLog;
-use App\Services\LogAnalyzers\Interfaces\LogAnalyzerInterface;
-use App\Services\LogAnalyzers\NginxLog;
 use App\Services\LogAnalyzers\TextLog;
 use Illuminate\Console\Command;
 
 
 class AnalyzeLogCommand extends Command
 {
-    protected static $types =[
-        'text'=> TextLog::class,
-        'nginx'=> NginxLog::class,
-        'apache'=> ApacheLog::class
-    ];
 
     /**
      * The name and signature of the console command.
@@ -31,15 +23,6 @@ class AnalyzeLogCommand extends Command
      */
     protected $description = 'Command description';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.
@@ -49,9 +32,9 @@ class AnalyzeLogCommand extends Command
     public function handle()
     {
         try {
-            $logType = $this->option('type');
-            $analyzer = $this->getLogAnalyzer($logType);
-            $analyzer->setFile($this->argument('file'));
+            $analyzer = new TextLog();
+
+            $analyzer->setFile();
             $analyzer->readData();
             $analyzer->parseData();
             $res = $analyzer->getAnalytics(true);
@@ -68,20 +51,6 @@ class AnalyzeLogCommand extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * @param $logType
-     * @return LogAnalyzerInterface
-     * @throws \Exception
-     */
-    private function getLogAnalyzer(string $logType)
-    {
-        $analyzerTypes = array_keys(self::$types);
-        if(in_array($logType, $analyzerTypes)){
-            return new self::$types[$logType];
-        }
-        throw  new \Exception('Incorrect log type');
     }
 
 }
