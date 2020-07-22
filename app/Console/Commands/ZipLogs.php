@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\File;
@@ -28,10 +29,11 @@ class ZipLogs extends Command
 
     /**
      * Execute the console command.
+     *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): int
     {
         $logFile = $this->option('file') ?? config('statistic.log_path');
         $date = Carbon::yesterday()->toDateString();
@@ -47,6 +49,7 @@ class ZipLogs extends Command
 
         } else {
             $this->info('File not exists');
+            return 1;
         }
         return 0;
     }

@@ -27,10 +27,13 @@ class StatisticServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $config  =   $routes = config('statistic');;
-        Route::matched(function (){
-            $url = URL::current();
-            Log::channel('custom')->info((Request::path()).' '.(Request::ip()));
-        });
+        Route::matched(
+            function () {
+                if (!in_array(Route::currentRouteName(), config('statistic.ignored_routes_names'), true)) {
+                    Log::channel('custom')->info((Request::path()) . ' ' . (Request::ip()));
+                }
+
+            }
+        );
     }
 }

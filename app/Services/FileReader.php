@@ -26,7 +26,7 @@ class FileReader
         }
         $this->fileBuffer = [];
         while (!feof($this->fileHandler)) {
-            $this->fileBuffer[] =  trim(str_replace(["\r", "\n", "\t"],"", fgets($this->fileHandler)));
+            $this->fileBuffer[] =  trim(str_replace(["\r", "\n", "\t"], "", fgets($this->fileHandler)));
             $lines--;
             if (!$lines) {
                 break;
@@ -37,8 +37,9 @@ class FileReader
 
     public function setOffset($line = 0)
     {
-        if (!$this->fileHandler)
+        if (!$this->fileHandler) {
             throw new Exception("Invalid file pointer");
+        }
 
         while (!feof($this->fileHandler) && $line--) {
             fgets($this->fileHandler);

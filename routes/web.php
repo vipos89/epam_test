@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/**only for mass generation of pages it's not for prod* */
+/**
+* only for mass generation of pages it's not for prod* 
+*/
 Route::any('/{path?}/{sub_path?}', 'HomeController@index');
 
